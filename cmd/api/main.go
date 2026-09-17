@@ -6,10 +6,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/matiasCoco1997/todo-list/internal/handler"
-	"github.com/matiasCoco1997/todo-list/internal/repository"
-	"github.com/matiasCoco1997/todo-list/internal/service"
+	"github.com/jackc/pgx/v5/pgxpool"                         //Librería externa que instalaste para poder conectarte a PostgreSQL.
+	"github.com/matiasCoco1997/todo-list/internal/handler"    //Importo el package Handler (de mi proyecto)
+	"github.com/matiasCoco1997/todo-list/internal/repository" //Importo el package Repository (de mi proyecto)
+	"github.com/matiasCoco1997/todo-list/internal/service"    //Importo el package Service (de mi proyecto)
 )
 
 func main() {
@@ -30,9 +30,9 @@ func main() {
 	fmt.Println("Conexión exitosa a PostgreSQL")
 
 	// 3. Inyección de dependencias (Database -> Repository -> Service -> Handler)
-	repo := repository.NewItemRepository(dbPool)
-	svc := service.NewItemService(repo)
-	h := handler.NewItemHandler(svc)
+	repo := repository.NewItemRepository(dbPool) //Creo el Repositorio enviando por parámetros la conexion de posgreSQL
+	svc := service.NewItemService(repo)          //Creo el Service enviando por parámetros el Repositorio creado para guardar información en la DB
+	h := handler.NewItemHandler(svc)             //Creo el Handler enviando por parámetros el Servicio que se encargará de la lógica de lo que se quiere realizar
 
 	// 4. Configurar rutas
 	http.HandleFunc("/api/items", h.GetItems)

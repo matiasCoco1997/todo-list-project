@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"github.com/matiasCoco1997/todo-list/internal/model" // Reemplazá TU_USUARIO
+	"github.com/matiasCoco1997/todo-list/internal/model"
 	"github.com/matiasCoco1997/todo-list/internal/repository"
 )
 
