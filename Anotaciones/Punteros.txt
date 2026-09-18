@@ -1,0 +1,106 @@
+===============================================================================
+                       GUÍA DE PUNTEROS EN GO (* y &)
+===============================================================================
+
+-------------------------------------------------------------------------------
+1. INTRODUCCIÓN Y LA METÁFORA DE LAS CASAS
+-------------------------------------------------------------------------------
+El concepto de "puntero" suele ser confuso al principio. Para entenderlo de 
+forma sencilla, utiliza la siguiente metáfora:
+
+Imagina la memoria RAM de tu computadora como un barrio gigante lleno de casas:
+
+  * LA CASA (El Valor):
+    Es la estructura de datos en sí (por ejemplo, los campos `ID`, `Nombre`, 
+    `Precio`, etc.). Ocupa un espacio físico y tangible en la memoria.
+
+  * LA DIRECCIÓN (El Puntero):
+    Es un papelito que tiene escrita la dirección de la casa (ejemplo: "Calle 
+    Falsa 123"). No es la casa física, sino una indicación de DÓNDE está.
+
+
+-------------------------------------------------------------------------------
+2. SIGNFICADO DE LOS SÍMBOLOS (* y &)
+-------------------------------------------------------------------------------
+En Go, usamos principalmente dos operadores para trabajar con direcciones de 
+memoria:
+
+  a) El Asterisco (*) -> Define un "Tipo Puntero" o "Desreferencia"
+     ---------------------------------------------------------------
+     Indica que una variable NO guarda el objeto en sí, sino ÚNICAMENTE la 
+     dirección de memoria donde ese objeto está guardado.
+
+  b) El Ampersand (&) -> Operador "Dirección de"
+     ------------------------------------------
+     Se usa antes de una variable u objeto para obtener su dirección de 
+     memoria. Equivale a decir: "Dame el papelito con la dirección de esta casa".
+
+
+-------------------------------------------------------------------------------
+3. ANÁLISIS DEL CÓDIGO CONCRETO
+-------------------------------------------------------------------------------
+
+Tomemos el constructor de tu proyecto:
+
+    func NewItemHandler(service *service.ItemService) *ItemHandler {
+        return &ItemHandler{service: service}
+    }
+
+
+--- CASO A: `service *service.ItemService` (Parámetro) ---
+
+  * ¿Qué hace?
+    Define que el parámetro `service` recibirá un puntero a `ItemService`.
+
+  * ¿Por qué se usa?
+    1. Eficiencia: Evita que Go duplique y copie en memoria toda la estructura 
+       de `ItemService` cada vez que se llama a la función. En lugar de copiar 
+       un objeto grande, solo se pasa la dirección (unos pocos bytes).
+    2. Compartir estado: Permite que el Handler trabaje EXACTAMENTE con la 
+       misma instancia del servicio que vive en el `main.go`, en lugar de una 
+       copia aislada.
+
+
+--- CASO B: `*ItemHandler` (Tipo de retorno) ---
+
+  * ¿Qué hace?
+    Avisa a la función que NO devolverá el objeto `ItemHandler` directamente, 
+    sino la DIRECCIÓN DE MEMORIA donde ese Handler fue creado.
+
+
+--- CASO C: `&ItemHandler{service: service}` (Retorno con &) ---
+
+  * ¿Qué hace?
+    El símbolo `&` al inicio crea la estructura `ItemHandler` en la memoria 
+    RAM y extrae inmediatamente su dirección para devolverla.
+
+
+-------------------------------------------------------------------------------
+4. COMPARACIÓN: PASO POR VALOR VS. PASO POR REFERENCIA (PUNTERO)
+-------------------------------------------------------------------------------
+
+  1. CON PUNTEROS (Paso por referencia - Recomendado para Handlers/Services)
+     ----------------------------------------------------------------------
+     func NewItemHandler(s *service.ItemService) *ItemHandler {
+         return &ItemHandler{service: s}
+     }
+     -> Trabajamos con el "papelito" de la dirección. Es rápido, liviano y 
+        mantiene un solo objeto compartido en todo el backend.
+
+  2. SIN PUNTEROS (Paso por valor)
+     -----------------------------
+     func NewItemHandler(s service.ItemService) ItemHandler {
+         return ItemHandler{service: s}
+     }
+     -> Se hace una fotocopia completa de `service` para guardarla dentro de 
+        una copia nueva de `ItemHandler`. Gasta más memoria y las modificaciones 
+        no se sincronizan entre sí.
+
+
+-------------------------------------------------------------------------------
+5. REGLA DE ORO PARA RECORDAR SIEMPRE
+-------------------------------------------------------------------------------
+
+  *  &T{}  --->  Construye T y me da su dirección. ("Dame el papelito")
+  *  *T    --->  Declara que aquí va una dirección a T. ("Puntero a T")
+===============================================================================
